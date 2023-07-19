@@ -1,0 +1,24 @@
+.lable {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.input {
+  padding-top: 40px;
+}
+
+.icon {
+  color: red;
+  padding-left: 5px;
+}
+
+.errorMsg {
+  /* max-width: 100%; */
+  font-size: 0.75rem;
+  color: rgb(248, 106, 106);
+}
+.errorTextField {
+  border: 1px solid red;
+  border-radius: 5px;
+}

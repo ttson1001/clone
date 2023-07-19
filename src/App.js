@@ -1,6 +1,6 @@
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter,  Route, Routes } from "react-router-dom";
 import "./App.css";
-import Project from "./pages/Project";
+import Project from "./pages/Projects/Project";
 import Default from "./pages/Deafault";
 import ProjectList from "./pages/ProjectList";
 
