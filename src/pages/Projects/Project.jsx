@@ -6,11 +6,14 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useEffect, useState } from "react";
-import { fetchOptions } from "./ProjectApi";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { fetchOptions, fetchProject } from "./ProjectApi";
 import axios from "axios";
+import { Navigate, useParams } from "react-router-dom";
+import dayjs from "dayjs";
 
-const data = {
+const dataInit = {
+  id: 0,
   name: "",
   projectNumber: 0,
   customer: "",
@@ -21,12 +24,27 @@ const data = {
   members:""
 }
 
+
 function Project() {
   const [groups, setGroups] = useState([]);
+  const [project, setProject] = useState(null);
+  let {projectId} = useParams();
+  useEffect(() => {
+
+    const fetchData = async () => {
+      const object = await fetchProject(projectId);
+      setProject(object);
+    };
+
+
+
+
+    fetchData();
+  }, [projectId]);
 
   const formik = useFormik({
     initialValues: {
-      projectNumber: "",
+      projectNumber:  "",
       name: "",
       customer: "",
       groupId: 1,
@@ -51,21 +69,21 @@ function Project() {
     }),
     onSubmit: async (values) => {
 
-      data.name = values.name;
-      data.customer = values.customer;
-      data.projectNumber = Number(values.projectNumber);
-      data.status = values.status;
-      data.startDate = values.startDate;
-      data.endDate = values.endDate;
-      data.groupId = Number(values.groupId);
-      data.members = values.members;
+      dataInit.name = values.name;
+      dataInit.customer = values.customer;
+      dataInit.projectNumber = Number(values.projectNumber);
+      dataInit.status = values.status;
+      dataInit.startDate = values.startDate;
+      dataInit.endDate = values.endDate;
+      dataInit.groupId = Number(values.groupId);
+      dataInit.members = values.members;
 
       try {
         const response = await axios.post(
           "https://localhost:7099/projects",
-          data
+          dataInit
         );
-        console.log("Record created:", response.data);
+        console.log("Record created:", response.dataInit);
         // Handle the created record data
       } catch (error) {
         console.error("Error creating record:", error);
@@ -84,13 +102,36 @@ function Project() {
     fetchData();
   }, []);
 
-  console.log(formik.errors);
 
-  // console.log(formik.values.startDate);
+useEffect(() => {
+  if(project !== null && projectId !== undefined) {
+
+    formik.values.name = project.data.name
+    formik.values.projectNumber = project.data.projectNumber
+    formik.values.customer = project.data.customer
+    formik.values.groupId = project.data.groupId
+    formik.values.status = project.data.status
+    formik.values.startDate = dayjs(project.data.startDate)
+    formik.values.endDate = dayjs(project.data.endDate)
+  }
+},[project])
+
+useLayoutEffect(() => {
+  if(projectId === undefined) {
+
+    formik.values.name = ""
+    formik.values.projectNumber = ""
+    formik.values.customer = ""
+    formik.values.groupId = 1
+    formik.values.status = "NEW"
+    formik.values.startDate = null
+    formik.values.endDate = null
+  }
+},[projectId])
   return (
     <>
       <div style={{ width: "70%" }}>
-        <h2>New Project</h2>
+        <h2>{projectId=== undefined ? "New Project" : "Update Project"}</h2>
         <hr />
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} style={{ padding: "20px" }}>
@@ -101,11 +142,12 @@ function Project() {
               <TextField
                 id="projectNumber"
                 name="projectNumber"
-                value={formik.values.projectNumber}
+                value={ formik.values.projectNumber}
                 onChange={formik.handleChange}
                 variant="outlined"
                 size="small"
                 error={formik.errors.projectNumber ? true : false}
+
               />
               {formik.errors.projectNumber && (
                 <p className="errorMsg">{formik.errors.projectNumber}</p>
@@ -163,7 +205,7 @@ function Project() {
               >
                 {groups.map((group) => (
                   <MenuItem key={group.id} value={group.id}>
-                    {group.name}
+                    {group.employeeDTO.visa}
                   </MenuItem>
                 ))}
               </TextField>
@@ -264,7 +306,7 @@ function Project() {
               </Button>
             </Grid>
             <Grid xs={4}>
-              <Button type="submit" fullWidth variant="contained">
+              <Button type="submit" fullWidth variant="contained" onClick={() => Navigate("/project-list")}>
                 Create Project
               </Button>
             </Grid>

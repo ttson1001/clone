@@ -1,0 +1,11 @@
+.body {
+    justify-content: center;
+    /* align-items: center; */
+    display: flex;
+}
+
+.paragrah{
+    font-size: 30px;
+    font-weight: 700;
+    color: #636363;
+}

@@ -1,0 +1,19 @@
+#link {
+  text-decoration: none;
+  color: #000;
+  display: block;
+  justify-content: right;
+  align-items: end;
+  font-weight: 600;
+}
+.projectList {
+  font-size: 30px;
+  color:#80a6db !important;
+}
+.containt {
+    margin-left: 30%;
+}
+
+.orther{
+    color: lightgrey !important;
+}
