@@ -33,4 +33,18 @@ export const fetchProjectList = async () => {
     return [];
   }
 };
+export const fetchProjectList2 = async (data) => {
+  try {
+    const response = await axios.post(
+      "https://localhost:7099/projects/search",
+      data
+    );
+    return response.data.data;
+    // Handle the created record data
+  } catch (error) {
+    console.error("Error creating record:", error);
+    // Handle the error
+  }
+};
+
 

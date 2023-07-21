@@ -1,29 +1,31 @@
 import { Link } from "react-router-dom";
-import "./SideBar.css"
+import "./SideBar.css";
+import { useLanguage } from "../../LanguageContext";
 
 function SideBar() {
+  const { language, setLanguage, translations } = useLanguage();
   return (
     <>
       <div className="containt">
-        <nav style={{ display: "block" , paddingTop: "40px"}}>
+        <nav style={{ display: "block", paddingTop: "40px" }}>
           <Link id="link" className="projectList" to="/">
-            Project list
+            {translations[language].titlePrjList}
           </Link>
           <br />
           <Link id="link" to="/project">
-            New
+            {translations[language].new}
           </Link>
           <br />
           <Link id="link" to="/project">
-            Project
+            {translations[language].project}
           </Link>
           <br />
           <Link id="link" className="orther" to="/#">
-            Customer
+          {translations[language].customer}
           </Link>
           <br />
           <Link id="link" className="orther" to="/#">
-            Supplier
+          {translations[language].supplier}
           </Link>
           <br />
           <Link id="link" className="orther" to="/error">

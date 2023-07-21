@@ -11,6 +11,7 @@ import { fetchOptions, fetchProject } from "./ProjectApi";
 import axios from "axios";
 import { Navigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
+import { useLanguage } from "../../LanguageContext";
 
 const dataInit = {
   id: 0,
@@ -21,33 +22,29 @@ const dataInit = {
   startDate: null,
   endDate: null,
   groupId: 0,
-  members:""
-}
-
+  members: "",
+};
 
 function Project() {
   const [groups, setGroups] = useState([]);
   const [project, setProject] = useState(null);
-  let {projectId} = useParams();
+  const { language, setLanguage, translations } = useLanguage();
+  let { projectId } = useParams();
   useEffect(() => {
-
     const fetchData = async () => {
       const object = await fetchProject(projectId);
       setProject(object);
     };
-
-
-
 
     fetchData();
   }, [projectId]);
 
   const formik = useFormik({
     initialValues: {
-      projectNumber:  "",
+      projectNumber: "",
       name: "",
       customer: "",
-      groupId: 1,
+      groupId: "",
       members: "",
       status: "NEW",
       startDate: null,
@@ -68,7 +65,6 @@ function Project() {
         ),
     }),
     onSubmit: async (values) => {
-
       dataInit.name = values.name;
       dataInit.customer = values.customer;
       dataInit.projectNumber = Number(values.projectNumber);
@@ -95,59 +91,54 @@ function Project() {
   useEffect(() => {
     const fetchData = async () => {
       const options = await fetchOptions();
-      formik.setFieldValue("selectValue", options[0].id);
       setGroups(options);
     };
 
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (project !== null && projectId !== undefined) {
+      formik.values.name = project.data.name;
+      formik.values.projectNumber = project.data.projectNumber;
+      formik.values.customer = project.data.customer;
+      formik.values.groupId = project.data.groupId;
+      formik.values.status = project.data.status;
+      formik.values.startDate = dayjs(project.data.startDate);
+      formik.values.endDate = dayjs(project.data.endDate);
+    }
+  }, [project]);
 
-useEffect(() => {
-  if(project !== null && projectId !== undefined) {
-
-    formik.values.name = project.data.name
-    formik.values.projectNumber = project.data.projectNumber
-    formik.values.customer = project.data.customer
-    formik.values.groupId = project.data.groupId
-    formik.values.status = project.data.status
-    formik.values.startDate = dayjs(project.data.startDate)
-    formik.values.endDate = dayjs(project.data.endDate)
-  }
-},[project])
-
-useLayoutEffect(() => {
-  if(projectId === undefined) {
-
-    formik.values.name = ""
-    formik.values.projectNumber = ""
-    formik.values.customer = ""
-    formik.values.groupId = 1
-    formik.values.status = "NEW"
-    formik.values.startDate = null
-    formik.values.endDate = null
-  }
-},[projectId])
+  useLayoutEffect(() => {
+    if (projectId === undefined) {
+      formik.values.name = "";
+      formik.values.projectNumber = "";
+      formik.values.customer = "";
+      formik.values.groupId = '';
+      formik.values.status = "NEW";
+      formik.values.startDate = null;
+      formik.values.endDate = null;
+    }
+  }, [projectId]);
   return (
     <>
       <div style={{ width: "70%" }}>
-        <h2>{projectId=== undefined ? "New Project" : "Update Project"}</h2>
+        <h2>{projectId === undefined ? translations[language].newProject : "Update Project"}</h2>
         <hr />
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} style={{ padding: "20px" }}>
             <Grid xs={2} className="lable">
-              Project Number <span className="icon">*</span>
+            {translations[language].projectNumber} <span className="icon">*</span>
             </Grid>
             <Grid xs={6} style={{ paddingTop: "20px" }}>
               <TextField
                 id="projectNumber"
                 name="projectNumber"
-                value={ formik.values.projectNumber}
+                value={formik.values.projectNumber}
                 onChange={formik.handleChange}
                 variant="outlined"
                 size="small"
                 error={formik.errors.projectNumber ? true : false}
-
               />
               {formik.errors.projectNumber && (
                 <p className="errorMsg">{formik.errors.projectNumber}</p>
@@ -155,7 +146,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={4}></Grid>
             <Grid xs={2} className="lable">
-              Project Name <span className="icon"> *</span>
+            {translations[language].projectName} <span className="icon"> *</span>
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -173,7 +164,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-              Customer <span className="icon">*</span>
+            {translations[language].customer} <span className="icon">*</span>
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -191,7 +182,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-              Group <span className="icon">*</span>
+            {translations[language].group} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -204,7 +195,7 @@ useLayoutEffect(() => {
                 fullWidth
               >
                 {groups.map((group) => (
-                  <MenuItem key={group.id} value={group.id}>
+                  <MenuItem key={group.id ?? ""} value={group.id ?? ""}>
                     {group.employeeDTO.visa}
                   </MenuItem>
                 ))}
@@ -212,7 +203,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={7.2}></Grid>
             <Grid xs={2} className="lable">
-              Members
+            {translations[language].members}
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -226,7 +217,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-              Status <span className="icon">*</span>
+            {translations[language].status} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -246,7 +237,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={7.2}></Grid>
             <Grid xs={2} className="lable">
-              Start date <span className="icon">*</span>
+            {translations[language].startDate} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -271,7 +262,7 @@ useLayoutEffect(() => {
             </Grid>
             <Grid xs={0.4}></Grid>
             <Grid xs={2} className="lable">
-              End date
+            {translations[language].endDate}
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -306,7 +297,12 @@ useLayoutEffect(() => {
               </Button>
             </Grid>
             <Grid xs={4}>
-              <Button type="submit" fullWidth variant="contained" onClick={() => Navigate("/project-list")}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={() => Navigate("/project-list")}
+              >
                 Create Project
               </Button>
             </Grid>

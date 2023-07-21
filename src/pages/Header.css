@@ -13,3 +13,12 @@
     margin-top: 30px;
     color:  #636363;
 }
+.languageButton{
+    display: inline;
+    background: none;
+    border: none;
+    color: blue;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+}

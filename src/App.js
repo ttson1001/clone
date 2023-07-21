@@ -5,7 +5,10 @@ import Default from "./pages/Deafault";
 import ProjectList from "./pages/ProjectList/ProjectList";
 import Error from "./pages/Error/Error";
 
+
 function App() {
+
+
   return (
     <BrowserRouter>
       <Routes>
@@ -16,7 +19,6 @@ function App() {
           </Route>
           <Route path="/project-list" element={<ProjectList />} />
         </Route>
-     
         <Route path="/error" element={<Error />} />
         <Route path="*" element={<Navigate to="/project-list" />}/> 
       </Routes>
