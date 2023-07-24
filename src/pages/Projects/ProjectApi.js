@@ -1,4 +1,5 @@
 import axios from "axios";
+import { async } from "q";
 export const fetchOptions = async () => {
   try {
     const response = await axios.get(
@@ -10,6 +11,7 @@ export const fetchOptions = async () => {
     return [];
   }
 };
+
 export const fetchProject = async (id) => {
     if(id === undefined) return null;
   try {
@@ -33,6 +35,7 @@ export const fetchProjectList = async () => {
     return [];
   }
 };
+
 export const fetchProjectList2 = async (data) => {
   try {
     const response = await axios.post(
@@ -46,5 +49,19 @@ export const fetchProjectList2 = async (data) => {
     // Handle the error
   }
 };
+
+export const fetchProjectNumberList = async (projectNumer) => {
+  if(projectNumer === undefined) return null;
+  try {
+    const response = await axios.get(
+      `https://localhost:7099/projects/check-project-number/${projectNumer}`
+    );
+    return response.data.data;
+    
+  } catch (error) {
+    console.error("Errpr fetching project number: ", error)
+    return null;
+  }
+}
 
 

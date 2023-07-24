@@ -7,11 +7,19 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { fetchOptions, fetchProject } from "./ProjectApi";
+import { useNavigate } from 'react-router-dom';
+import {
+  fetchOptions,
+  fetchProject,
+  fetchProjectNumberList,
+} from "./ProjectApi";
 import axios from "axios";
-import { Navigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useLanguage } from "../../LanguageContext";
+
+
+
 
 const dataInit = {
   id: 0,
@@ -26,10 +34,13 @@ const dataInit = {
 };
 
 function Project() {
+  const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [project, setProject] = useState(null);
   const { language, setLanguage, translations } = useLanguage();
+  const [check, setChek] = useState(true)
   let { projectId } = useParams();
+
   useEffect(() => {
     const fetchData = async () => {
       const object = await fetchProject(projectId);
@@ -75,11 +86,16 @@ function Project() {
       dataInit.members = values.members;
 
       try {
-        const response = await axios.post(
-          "https://localhost:7099/projects",
-          dataInit
-        );
-        console.log("Record created:", response.dataInit);
+        if (formik.errors !== null) {
+          const response = await axios.post(
+            "https://localhost:7099/projects",
+            dataInit
+          );
+         
+          console.log("Record created:", response.dataInit);
+          navigate('/project-list');
+        }
+
         // Handle the created record data
       } catch (error) {
         console.error("Error creating record:", error);
@@ -90,6 +106,22 @@ function Project() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const options = await fetchProjectNumberList(
+        Number(formik.values.projectNumber)
+      );
+      setChek(options);
+    };
+
+    fetchData();
+
+  }, [formik.values.projectNumber]);
+  console.log(formik.errors.projectNumber);
+  console.log("13-", formik.values.projectNumber.length);
+  console.log("12-", check === false && formik.values.projectNumber.length > 0);
+  if (check === false && formik.values.projectNumber.length > 0){
+  }
+  useEffect(() => {
+    const fetchData = async () => {
       const options = await fetchOptions();
       setGroups(options);
     };
@@ -97,8 +129,20 @@ function Project() {
     fetchData();
   }, []);
 
+  
+
   useEffect(() => {
+    // console.log("11-",project.data.name);
+    var string = "";
     if (project !== null && projectId !== undefined) {
+      for(var i = 0; i<= project.data.employeeDto.length -1; i++){
+        console.log("for", i);
+      
+       if(i=== (project.data.employeeDto.length-1)) string+= project.data.employeeDto[i].visa
+       else   string = string + project.data.employeeDto[i].visa + "," 
+      }
+     console.log("134-", string); 
+
       formik.values.name = project.data.name;
       formik.values.projectNumber = project.data.projectNumber;
       formik.values.customer = project.data.customer;
@@ -106,29 +150,43 @@ function Project() {
       formik.values.status = project.data.status;
       formik.values.startDate = dayjs(project.data.startDate);
       formik.values.endDate = dayjs(project.data.endDate);
+      formik.values.members = string;
+
+      // project.data.employeeDto.forEach(element => {
+      //   formik.values.members = formik.values.members.concat(project.data.employeeDto.visa)
+      // });
+      // console.log("11-",project.data.employeeDto.length);
     }
   }, [project]);
+
+ 
 
   useLayoutEffect(() => {
     if (projectId === undefined) {
       formik.values.name = "";
       formik.values.projectNumber = "";
       formik.values.customer = "";
-      formik.values.groupId = '';
+      formik.values.groupId = "";
       formik.values.status = "NEW";
       formik.values.startDate = null;
       formik.values.endDate = null;
+      formik.values.members ="";
     }
   }, [projectId]);
   return (
     <>
       <div style={{ width: "70%" }}>
-        <h2>{projectId === undefined ? translations[language].newProject : "Update Project"}</h2>
+        <h2>
+          {projectId === undefined
+            ? translations[language].newProject
+            : "Update Project"}
+        </h2>
         <hr />
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} style={{ padding: "20px" }}>
             <Grid xs={2} className="lable">
-            {translations[language].projectNumber} <span className="icon">*</span>
+              {translations[language].projectNumber}{" "}
+              <span className="icon">*</span>
             </Grid>
             <Grid xs={6} style={{ paddingTop: "20px" }}>
               <TextField
@@ -138,15 +196,19 @@ function Project() {
                 onChange={formik.handleChange}
                 variant="outlined"
                 size="small"
-                error={formik.errors.projectNumber ? true : false}
+                error={(formik.errors.projectNumber || !check) && projectId ===undefined  ? true : false}
               />
               {formik.errors.projectNumber && (
                 <p className="errorMsg">{formik.errors.projectNumber}</p>
               )}
+               {(check === false && projectId=== undefined) && (
+                <p className="errorMsg">{"Project number is exist!!"}</p>
+              )}
             </Grid>
             <Grid xs={4}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].projectName} <span className="icon"> *</span>
+              {translations[language].projectName}{" "}
+              <span className="icon"> *</span>
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -164,7 +226,7 @@ function Project() {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].customer} <span className="icon">*</span>
+              {translations[language].customer} <span className="icon">*</span>
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -182,7 +244,7 @@ function Project() {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].group} <span className="icon">*</span>
+              {translations[language].group} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -203,7 +265,7 @@ function Project() {
             </Grid>
             <Grid xs={7.2}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].members}
+              {translations[language].members}
             </Grid>
             <Grid xs={8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -217,7 +279,7 @@ function Project() {
             </Grid>
             <Grid xs={2}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].status} <span className="icon">*</span>
+              {translations[language].status} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <TextField
@@ -237,7 +299,7 @@ function Project() {
             </Grid>
             <Grid xs={7.2}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].startDate} <span className="icon">*</span>
+              {translations[language].startDate} <span className="icon">*</span>
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -262,7 +324,7 @@ function Project() {
             </Grid>
             <Grid xs={0.4}></Grid>
             <Grid xs={2} className="lable">
-            {translations[language].endDate}
+              {translations[language].endDate}
             </Grid>
             <Grid xs={2.8} style={{ paddingTop: "20px" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -297,14 +359,9 @@ function Project() {
               </Button>
             </Grid>
             <Grid xs={4}>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                onClick={() => Navigate("/project-list")}
-              >
-                Create Project
-              </Button>
+                <Button type="submit" fullWidth variant="contained">
+                  Create Project
+                </Button>
             </Grid>
           </Grid>
         </form>

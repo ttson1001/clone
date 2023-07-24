@@ -21,7 +21,7 @@ function ProjectList() {
     searchObject.status = selectedValue
     const fetchData = async () => {
       const options = await fetchProjectList2(searchObject);
-      setData(options);
+      setData(options?? []);
     };
 
     fetchData();
@@ -36,7 +36,7 @@ function ProjectList() {
 
     const fetchData = async () => {
       const options = await fetchProjectList2(searchObject);
-      setData(options);
+      setData(options ??[]);
     };
 
     fetchData();
