@@ -35,7 +35,8 @@ export function LanguageProvider({ children }) {
       group: "Group",
       members: "Members",
       endDate: "End date",
-      updateProject: "Update Project"
+      updateProject: "Update Project",
+      cancel: "Cancel"
     },
     fr: {
       logoutButton: "Se déconnecter",
@@ -61,6 +62,7 @@ export function LanguageProvider({ children }) {
       members: "Membres",
       endDate: "Date de fin",
       updateProject: "Mettre à jour le projet",
+      cancel: "Annuler"
     },
   };
 

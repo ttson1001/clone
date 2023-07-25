@@ -6,20 +6,17 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   fetchOptions,
   fetchProject,
   fetchProjectNumberList,
 } from "./ProjectApi";
 import axios from "axios";
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useLanguage } from "../../LanguageContext";
-
-
-
 
 const dataInit = {
   id: 0,
@@ -36,19 +33,10 @@ const dataInit = {
 function Project() {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
-  const [project, setProject] = useState(null);
   const { language, setLanguage, translations } = useLanguage();
-  const [check, setChek] = useState(true)
+  const [check, setChek] = useState(true);
   let { projectId } = useParams();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const object = await fetchProject(projectId);
-      setProject(object);
-    };
-
-    fetchData();
-  }, [projectId]);
+  console.log("sdf", projectId);
 
   const formik = useFormik({
     initialValues: {
@@ -60,6 +48,7 @@ function Project() {
       status: "NEW",
       startDate: null,
       endDate: null,
+      version: null,
     },
     validationSchema: Yup.object({
       projectNumber: Yup.string()
@@ -82,24 +71,31 @@ function Project() {
       dataInit.status = values.status;
       dataInit.startDate = values.startDate;
       dataInit.endDate = values.endDate;
+
+      console.log(values.endDate);
       dataInit.groupId = Number(values.groupId);
       dataInit.members = values.members;
+      dataInit.version = values.version
 
       try {
-        if (formik.errors !== null) {
+        if (formik.errors !== null && projectId === undefined) {
           const response = await axios.post(
             "https://localhost:7099/projects",
             dataInit
           );
-         
           console.log("Record created:", response.dataInit);
-          navigate('/project-list');
+          navigate("/project-list");
+        } else {
+          dataInit.id = projectId;
+          const response = await axios.put(
+            "https://localhost:7099/projects",
+            dataInit
+          );
+          console.log("Record created:", response.dataInit);
+          navigate("/project-list");
         }
-
-        // Handle the created record data
       } catch (error) {
-        console.error("Error creating record:", error);
-        // Handle the error
+        if(error.response.status === 500) navigate("/error");
       }
     },
   });
@@ -113,12 +109,9 @@ function Project() {
     };
 
     fetchData();
-
   }, [formik.values.projectNumber]);
-  console.log(formik.errors.projectNumber);
-  console.log("13-", formik.values.projectNumber.length);
-  console.log("12-", check === false && formik.values.projectNumber.length > 0);
-  if (check === false && formik.values.projectNumber.length > 0){
+
+  if (check === false && formik.values.projectNumber.length > 0) {
   }
   useEffect(() => {
     const fetchData = async () => {
@@ -129,57 +122,64 @@ function Project() {
     fetchData();
   }, []);
 
-  
+  useEffect(() => {
+    const fetchData = async () => {
+      const object = await fetchProject(projectId);
+      var members = "";
+      if (object != null) {
+        for (var i = 0; i <= object.data.employeeDto.length - 1; i++) {
+          if (i === object.data.employeeDto.length - 1)
+            members += object.data.employeeDto[i].visa;
+          else members = members + object.data.employeeDto[i].visa + ",";
+          formik.setFieldValue("name", object.data.name, true);
+          formik.setFieldValue(
+            "projectNumber",
+            object.data.projectNumber,
+            true
+          );
+          formik.setFieldValue("version", object.data.version, true);
+          formik.setFieldValue("customer", object.data.customer, true);
+          formik.setFieldValue("groupId", object.data.groupId, true);
+          formik.setFieldValue("status", object.data.status, true);
+          formik.setFieldValue("startDate", dayjs(object.data.startDate, true));
+          console.log(object.data.endDate !== "0001-01-01T00:00:00");
+          if (object.data.endDate !== "0001-01-01T00:00:00") {
+            formik.setFieldValue("endDate", dayjs(object.data.endDate, true));
+          } else {
+            formik.setFieldValue("endDate", null, true);
+          }
+          formik.setFieldValue("members", members, true);
+        }
+      }
+    };
+    fetchData();
+  }, [projectId]);
+
+  console.log(formik.values.version);
+  const handleBlur = (field) => () => {
+    formik.setFieldTouched(field, true);
+  };
 
   useEffect(() => {
-    // console.log("11-",project.data.name);
-    var string = "";
-    if (project !== null && projectId !== undefined) {
-      for(var i = 0; i<= project.data.employeeDto.length -1; i++){
-        console.log("for", i);
-      
-       if(i=== (project.data.employeeDto.length-1)) string+= project.data.employeeDto[i].visa
-       else   string = string + project.data.employeeDto[i].visa + "," 
-      }
-     console.log("134-", string); 
-
-      formik.values.name = project.data.name;
-      formik.values.projectNumber = project.data.projectNumber;
-      formik.values.customer = project.data.customer;
-      formik.values.groupId = project.data.groupId;
-      formik.values.status = project.data.status;
-      formik.values.startDate = dayjs(project.data.startDate);
-      formik.values.endDate = dayjs(project.data.endDate);
-      formik.values.members = string;
-
-      // project.data.employeeDto.forEach(element => {
-      //   formik.values.members = formik.values.members.concat(project.data.employeeDto.visa)
-      // });
-      // console.log("11-",project.data.employeeDto.length);
-    }
-  }, [project]);
-
- 
-
-  useLayoutEffect(() => {
-    if (projectId === undefined) {
-      formik.values.name = "";
-      formik.values.projectNumber = "";
-      formik.values.customer = "";
-      formik.values.groupId = "";
-      formik.values.status = "NEW";
-      formik.values.startDate = null;
-      formik.values.endDate = null;
-      formik.values.members ="";
+    if (!projectId) {
+      formik.setFieldValue("name", "");
+      formik.setFieldValue("projectNumber", "");
+      formik.setFieldValue("customer", "");
+      formik.setFieldValue("groupId", "");
+      formik.setFieldValue("status", "NEW");
+      formik.setFieldValue("startDate", null);
+      formik.setFieldValue("endDate", null);
+      formik.setFieldValue("members", "");
     }
   }, [projectId]);
+
   return (
     <>
       <div style={{ width: "70%" }}>
         <h2>
           {projectId === undefined
             ? translations[language].newProject
-            : "Update Project"}
+            : translations[language].updateProject}
         </h2>
         <hr />
         <form onSubmit={formik.handleSubmit}>
@@ -194,14 +194,19 @@ function Project() {
                 name="projectNumber"
                 value={formik.values.projectNumber}
                 onChange={formik.handleChange}
+                onBlur={handleBlur("projectNumber")}
                 variant="outlined"
                 size="small"
-                error={(formik.errors.projectNumber || !check) && projectId ===undefined  ? true : false}
+                error={
+                  (formik.errors.projectNumber || !check) &&
+                  formik.touched.projectNumber
+                }
+                disabled={projectId !== undefined}
               />
-              {formik.errors.projectNumber && (
+              {formik.errors.projectNumber && formik.touched.projectNumber && (
                 <p className="errorMsg">{formik.errors.projectNumber}</p>
               )}
-               {(check === false && projectId=== undefined) && (
+              {check === false && projectId === undefined && (
                 <p className="errorMsg">{"Project number is exist!!"}</p>
               )}
             </Grid>
@@ -216,11 +221,12 @@ function Project() {
                 id="name"
                 name="name"
                 value={formik.values.name}
+                onBlur={handleBlur("name")}
                 onChange={formik.handleChange}
                 size="small"
-                error={formik.errors.name ? true : false}
+                error={formik.errors.name && formik.touched.name ? true : false}
               />
-              {formik.errors.name && (
+              {formik.errors.name && formik.touched.name && (
                 <p className="errorMsg">{formik.errors.name}</p>
               )}
             </Grid>
@@ -233,12 +239,17 @@ function Project() {
                 id="customer"
                 name="customer"
                 value={formik.values.customer}
+                onBlur={handleBlur("customer")}
                 onChange={formik.handleChange}
                 fullWidth
                 size="small"
-                error={formik.errors.customer ? true : false}
+                error={
+                  formik.errors.customer && formik.touched.customer
+                    ? true
+                    : false
+                }
               />
-              {formik.errors.customer && (
+              {formik.errors.customer && formik.touched.customer && (
                 <p className="errorMsg">{formik.errors.customer}</p>
               )}
             </Grid>
@@ -307,17 +318,19 @@ function Project() {
                   id="startDate"
                   name="startDate"
                   value={formik.values.startDate}
+                  onSelectedSectionsChange={handleBlur("startDate")}
                   onChange={(value) => {
                     formik.setFieldValue("startDate", value, true);
                   }}
                   slotProps={{
                     textField: {
                       size: "small",
-                      error: formik.errors.startDate ? true : false,
+                      error:
+                        formik.errors.startDate && formik.touched.startDate,
                     },
                   }}
                 />
-                {formik.errors.startDate && (
+                {formik.touched.startDate && formik.errors.startDate && (
                   <p className="errorMsg">{formik.errors.startDate}</p>
                 )}
               </LocalizationProvider>
@@ -355,13 +368,15 @@ function Project() {
             <Grid xs={3}></Grid>
             <Grid xs={3}>
               <Button fullWidth variant="outlined">
-                Cancel
+                {translations[language].cancel}
               </Button>
             </Grid>
             <Grid xs={4}>
-                <Button type="submit" fullWidth variant="contained">
-                  Create Project
-                </Button>
+              <Button type="submit" fullWidth variant="contained">
+                {projectId !== undefined
+                  ? translations[language].updateProject
+                  : "Create Project"}
+              </Button>
             </Grid>
           </Grid>
         </form>

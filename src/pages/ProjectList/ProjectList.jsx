@@ -1,8 +1,8 @@
-import { Button, Grid, InputLabel, MenuItem, TextField } from "@mui/material";
+import { Button, Grid, MenuItem, TextField } from "@mui/material";
 import DataGridDemo from "./Table";
 import { useEffect, useState } from "react";
 
-import { fetchProjectList2 } from "../Projects/ProjectApi";
+import { deleteProject, fetchProjectList2 } from "../Projects/ProjectApi";
 import { useLanguage } from "../../LanguageContext";
 
 function ProjectList() {
@@ -27,6 +27,18 @@ function ProjectList() {
     fetchData();
   }
 
+  const handleDeleteRow = async (id) => {
+    try {
+
+      const newList = { ids: [id] };
+      await deleteProject(newList)
+      setData(data.filter((row) => row.id !== id));
+    } catch (error) {
+      console.log("Error deleting project: ", error);
+    }
+  };
+
+
   const handleReset = () => {
     searchObject.searchValue = null;
     searchObject.status = null;
@@ -49,11 +61,10 @@ function ProjectList() {
     const fetchData = async () => {
       const options = await fetchProjectList2(searchObject);
       setData(options?? []);
-    };
-
+    };  
+    
     fetchData();
   }, []);
-
 
   return (
     <div style={{ width: "90%" }}>
@@ -104,7 +115,7 @@ function ProjectList() {
       </Grid>
 
       <div>
-        <DataGridDemo data={data} />
+        <DataGridDemo data={data} onDeleteRow={handleDeleteRow}/>
       </div>
     </div>
   );

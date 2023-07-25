@@ -60,8 +60,55 @@ export const fetchProjectNumberList = async (projectNumer) => {
     
   } catch (error) {
     console.error("Errpr fetching project number: ", error)
+    console.log(error.JSON);
     return null;
   }
 }
+
+export const addProject = async (project) => {
+  if(project === undefined) return null;
+  try {
+    const response = await axios.post(
+      `https://localhost:7099/projects/${project}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Errpr fetching project number: ", error)
+    return null;
+  }
+}
+
+export const deleteProject = async (data) => {
+  if(!data) return null;
+  console.log("sdfa",JSON.stringify(data));
+
+  try {
+    const response = await axios.delete(
+      `https://localhost:7099/projects`,{data: data,}
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Errpr fetching project number: ", error)
+    return null;
+  }
+}
+
+  // export const deleteProject = async (data) => {
+  //   if (!data) return null;
+  //   console.log("sdfa", JSON.stringify(data));
+  
+  //   try {
+  //     const response = await axios.delete("https://localhost:7099/projects", {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       data: JSON.stringify(data),
+  //     });
+  //     return response.data.data;
+  //   } catch (error) {
+  //     console.error("Error fetching project number: ", error);
+  //     return null;
+  //   }
+  
 
 

@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
 import Header from "../Header";
 import "./Error.css";
+import { Link } from "react-router-dom";
 
 function Error() {
   return (
@@ -31,21 +32,28 @@ function Error() {
               <span className="paragrah">Unexpected error occurred.</span>
               <br /> <span className="paragrah"> Please </span>{" "}
               <span
-                style={{ color: "#c64d35", fontSize: "30px", fontWeight: "700" }}
+                style={{
+                  color: "#c64d35",
+                  fontSize: "30px",
+                  fontWeight: "700",
+                }}
               >
                 contact your administrator
               </span>
             </p>
-            <span className="paragrah"> or </span>{" "}
-            <span
-              style={{
-                color: "#3c85e9",
-                fontSize: "30px",
-                fontWeight: "700",
-              }}
-            >
-              back to search project
-            </span>
+           
+            <Link id="link" className="orther" to="/project-list">
+            <span className="paragrah"> or </span>
+              <span
+                style={{
+                  color: "#3c85e9",
+                  fontSize: "30px",
+                  fontWeight: "700",
+                }}
+              >
+                back to search project
+              </span>
+            </Link>
           </Grid>
         </Grid>
       </div>
