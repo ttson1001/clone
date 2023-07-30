@@ -1,5 +1,6 @@
 import axios from "axios";
-import { async } from "q";
+// import { useNavigate } from "react-router-dom";
+
 export const fetchOptions = async () => {
   try {
     const response = await axios.get(
@@ -37,14 +38,16 @@ export const fetchProjectList = async () => {
 };
 
 export const fetchProjectList2 = async (data) => {
+  // const navigate = useNavigate();
   try {
     const response = await axios.post(
       "https://localhost:7099/projects/search",
       data
     );
     return response.data.data;
-    // Handle the created record data
+
   } catch (error) {
+    if(error.code === "ERR_NETWORK")
     console.error("Error creating record:", error);
     // Handle the error
   }
@@ -60,7 +63,6 @@ export const fetchProjectNumberList = async (projectNumer) => {
     
   } catch (error) {
     console.error("Errpr fetching project number: ", error)
-    console.log(error.JSON);
     return null;
   }
 }

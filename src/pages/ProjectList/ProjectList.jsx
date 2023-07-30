@@ -1,7 +1,8 @@
 import { Button, Grid, MenuItem, TextField } from "@mui/material";
 import DataGridDemo from "./Table";
 import { useEffect, useState } from "react";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { deleteProject, fetchProjectList2 } from "../Projects/ProjectApi";
 import { useLanguage } from "../../LanguageContext";
 
@@ -27,16 +28,32 @@ function ProjectList() {
     fetchData();
   }
 
-  const handleDeleteRow = async (id) => {
+  const handleDeleteRow = async (ids) => {
     try {
-
-      const newList = { ids: [id] };
+      const confirmed = window.confirm("Are you sure you want to delete this row?");
+      if (!confirmed) {
+        return; // User canceled the delete operation.
+      }
+      const newList = { ids: ids };
       await deleteProject(newList)
-      setData(data.filter((row) => row.id !== id));
+      setData((data) => data.filter((row) => !ids.includes(row.id)));
+      toast.success("Row(s) deleted successfully!", {
+        position: toast.POSITION.TOP_RIGHT,});
     } catch (error) {
       console.log("Error deleting project: ", error);
+      toast.error("Row(s) deleted faill!", {
+        position: toast.POSITION.BOTTOM_RIGHT,});
     }
   };
+
+  const handleCliclss = () => {
+    toast.success("Row(s) deleted successfully!", {
+      autoClose: 1500,
+      position: toast.POSITION.TOP_RIGHT,});
+      toast.error("Row(s) deleted faill!", {
+        autoClose: 1500,
+        position: toast.POSITION.TOP_RIGHT,});
+  }
 
 
   const handleReset = () => {
@@ -117,6 +134,8 @@ function ProjectList() {
       <div>
         <DataGridDemo data={data} onDeleteRow={handleDeleteRow}/>
       </div>
+
+      <button onClick={handleCliclss}>sssssssssssss</button>
     </div>
   );
 }

@@ -17,6 +17,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useLanguage } from "../../LanguageContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const dataInit = {
   id: 0,
@@ -35,6 +37,7 @@ function Project() {
   const [groups, setGroups] = useState([]);
   const { language, setLanguage, translations } = useLanguage();
   const [check, setChek] = useState(true);
+  const [errorState, setError] = useState(null);
   let { projectId } = useParams();
   console.log("sdf", projectId);
 
@@ -75,7 +78,7 @@ function Project() {
       console.log(values.endDate);
       dataInit.groupId = Number(values.groupId);
       dataInit.members = values.members;
-      dataInit.version = values.version
+      dataInit.version = values.version;
 
       try {
         if (formik.errors !== null && projectId === undefined) {
@@ -84,6 +87,9 @@ function Project() {
             dataInit
           );
           console.log("Record created:", response.dataInit);
+          toast.success("Row(s) create successfully!", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 1000,});
           navigate("/project-list");
         } else {
           dataInit.id = projectId;
@@ -95,7 +101,8 @@ function Project() {
           navigate("/project-list");
         }
       } catch (error) {
-        if(error.response.status === 500) navigate("/error");
+        if (error.response.status === 500) navigate("/error");
+        else setError(error.response.data.message);
       }
     },
   });
@@ -127,29 +134,27 @@ function Project() {
       const object = await fetchProject(projectId);
       var members = "";
       if (object != null) {
-        for (var i = 0; i <= object.data.employeeDto.length - 1; i++) {
-          if (i === object.data.employeeDto.length - 1)
-            members += object.data.employeeDto[i].visa;
-          else members = members + object.data.employeeDto[i].visa + ",";
-          formik.setFieldValue("name", object.data.name, true);
-          formik.setFieldValue(
-            "projectNumber",
-            object.data.projectNumber,
-            true
-          );
-          formik.setFieldValue("version", object.data.version, true);
-          formik.setFieldValue("customer", object.data.customer, true);
-          formik.setFieldValue("groupId", object.data.groupId, true);
-          formik.setFieldValue("status", object.data.status, true);
-          formik.setFieldValue("startDate", dayjs(object.data.startDate, true));
-          console.log(object.data.endDate !== "0001-01-01T00:00:00");
-          if (object.data.endDate !== "0001-01-01T00:00:00") {
-            formik.setFieldValue("endDate", dayjs(object.data.endDate, true));
-          } else {
-            formik.setFieldValue("endDate", null, true);
+        if (object.data.employeeDto.length !== 0) {
+          for (var i = 0; i <= object.data.employeeDto.length - 1; i++) {
+            if (i === object.data.employeeDto.length - 1)
+              members += object.data.employeeDto[i].visa;
+            else members = members + object.data.employeeDto[i].visa + ",";
           }
-          formik.setFieldValue("members", members, true);
         }
+        formik.setFieldValue("name", object.data.name, true);
+        formik.setFieldValue("projectNumber", object.data.projectNumber, true);
+        formik.setFieldValue("version", object.data.version, true);
+        formik.setFieldValue("customer", object.data.customer, true);
+        formik.setFieldValue("groupId", object.data.groupId, true);
+        formik.setFieldValue("status", object.data.status, true);
+        formik.setFieldValue("startDate", dayjs(object.data.startDate, true));
+        console.log(object.data.endDate !== "0001-01-01T00:00:00");
+        if (object.data.endDate !== "0001-01-01T00:00:00") {
+          formik.setFieldValue("endDate", dayjs(object.data.endDate, true));
+        } else {
+          formik.setFieldValue("endDate", null, true);
+        }
+        formik.setFieldValue("members", members, true);
       }
     };
     fetchData();
@@ -162,6 +167,7 @@ function Project() {
 
   useEffect(() => {
     if (!projectId) {
+      dataInit.id = 0;
       formik.setFieldValue("name", "");
       formik.setFieldValue("projectNumber", "");
       formik.setFieldValue("customer", "");
@@ -182,6 +188,17 @@ function Project() {
             : translations[language].updateProject}
         </h2>
         <hr />
+        <p className="errorMsg" style={{ fontSize: "15px", fontWeight: 700 }}>
+          {errorState}
+        </p>
+        <p className="errorMsg" style={{ fontSize: "15px", fontWeight: 700 }}>
+          {(formik.errors.projectNumber === "Required" ||
+          formik.errors.name === "Required" ||
+          formik.errors.customer === "Required" ||
+          formik.errors.startDate) && formik.touched.projectNumber 
+            ? "Please enter all the mandatory fields (*)"
+            : ""}
+        </p>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} style={{ padding: "20px" }}>
             <Grid xs={2} className="lable">
@@ -367,7 +384,11 @@ function Project() {
             <Grid xs={2}></Grid>
             <Grid xs={3}></Grid>
             <Grid xs={3}>
-              <Button fullWidth variant="outlined">
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => navigate("/project-list")}
+              >
                 {translations[language].cancel}
               </Button>
             </Grid>
@@ -375,7 +396,7 @@ function Project() {
               <Button type="submit" fullWidth variant="contained">
                 {projectId !== undefined
                   ? translations[language].updateProject
-                  : "Create Project"}
+                  : translations[language].createProject}
               </Button>
             </Grid>
           </Grid>

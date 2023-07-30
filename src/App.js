@@ -4,6 +4,8 @@ import Project from "./pages/Projects/Project";
 import Default from "./pages/Deafault";
 import ProjectList from "./pages/ProjectList/ProjectList";
 import Error from "./pages/Error/Error";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 function App() {
@@ -22,7 +24,9 @@ function App() {
         <Route path="/error" element={<Error />} />
         <Route path="*" element={<Navigate to="/project-list" />}/> 
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
+
   );
 }
 
