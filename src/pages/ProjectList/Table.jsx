@@ -15,7 +15,6 @@ export default function DataGridDemo({ data, onDeleteRow }) {
     return params.row.status === "NEW";
    
   };
-  console.log(rowSelectionModel);
 
   const handleDeleteSelected = () => {
     console.log("Deleting selected rows:", rowSelectionModel);
@@ -26,7 +25,7 @@ export default function DataGridDemo({ data, onDeleteRow }) {
     {
       field: "projectNumber",
       headerName: `${translations[language].number}`,
-      width: 90,
+      width: 120,
       renderCell: (params) => (
         <Link
           to={`/project/${params.row.id}`}
@@ -39,13 +38,13 @@ export default function DataGridDemo({ data, onDeleteRow }) {
     {
       field: "name",
       headerName: `${translations[language].name}`,
-      width: 300,
+      width: 250,
       editable: false,
     },
     {
       field: "status",
       headerName: `${translations[language].status}`,
-      width: 150,
+      width: 120,
       editable: false,
     },
     {
@@ -62,7 +61,6 @@ export default function DataGridDemo({ data, onDeleteRow }) {
       renderCell: (params) => {
         const startDateValue = new Date(params.value);
         const formattedDate = startDateValue.toLocaleDateString(language);
-
         return formattedDate;
       },
     },
@@ -88,7 +86,6 @@ export default function DataGridDemo({ data, onDeleteRow }) {
         ) : null,
     },
   ];
-  console.log("cc");
   return (
     <Box sx={{ height: 400, width: "100%" }}>
       <DataGrid
@@ -120,7 +117,7 @@ export default function DataGridDemo({ data, onDeleteRow }) {
         onClick={handleDeleteSelected}
         disabled={rowSelectionModel.length === 0}
       >
-        Delete Selected
+       {translations[language].delete}
       </Button>
     </Box>
   );

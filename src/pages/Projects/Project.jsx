@@ -39,7 +39,8 @@ function Project() {
   const [check, setChek] = useState(true);
   const [errorState, setError] = useState(null);
   let { projectId } = useParams();
-  console.log("sdf", projectId);
+
+  const NULL_DATE = "01-01-0001";
 
   const formik = useFormik({
     initialValues: {
@@ -55,18 +56,22 @@ function Project() {
     },
     validationSchema: Yup.object({
       projectNumber: Yup.string()
-        .required("Required")
+        .required("Please enter project number")
         .max(4, "Must be 4 number"),
-      name: Yup.string().required("Required"),
-      customer: Yup.string().required("Required"),
-      startDate: Yup.date().required("Required"),
+      name: Yup.string().required("Please enter project name").max(50,"Musht be 50 letter"),
+      customer: Yup.string().required("Please enter customer").max(50,"Musht be 50 letter"),
+      startDate: Yup.date().required("Please enter start date").typeError('A Date is invalid'),
       endDate: Yup.date()
         .nullable()
         .min(
           Yup.ref("startDate"),
           "End date must be later than the start date"
-        ),
+        )
+        .typeError('A Date is invalid'),
     }),
+
+    
+
     onSubmit: async (values) => {
       dataInit.name = values.name;
       dataInit.customer = values.customer;
@@ -74,8 +79,6 @@ function Project() {
       dataInit.status = values.status;
       dataInit.startDate = values.startDate;
       dataInit.endDate = values.endDate;
-
-      console.log(values.endDate);
       dataInit.groupId = Number(values.groupId);
       dataInit.members = values.members;
       dataInit.version = values.version;
@@ -87,9 +90,10 @@ function Project() {
             dataInit
           );
           console.log("Record created:", response.dataInit);
-          toast.success("Row(s) create successfully!", {
+          toast.success("Project create successfully!", {
             position: toast.POSITION.TOP_RIGHT,
-            autoClose: 1000,});
+            autoClose: 1500,
+          });
           navigate("/project-list");
         } else {
           dataInit.id = projectId;
@@ -98,21 +102,36 @@ function Project() {
             dataInit
           );
           console.log("Record created:", response.dataInit);
+          toast.success("Project update successfully!", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 1500,
+          });
           navigate("/project-list");
         }
       } catch (error) {
-        if (error.response.status === 500) navigate("/error");
-        else setError(error.response.data.message);
+        if (error.response.status === 500) {
+          toast.error("Project update error!", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 1500,
+          });
+        } else setError(error.response.data.message);
       }
     },
   });
+  const checkDate = formik.values.startDate === null
+
+
 
   useEffect(() => {
     const fetchData = async () => {
-      const options = await fetchProjectNumberList(
-        Number(formik.values.projectNumber)
-      );
-      setChek(options);
+      try {
+        const options = await fetchProjectNumberList(
+          Number(formik.values.projectNumber)
+        );
+        setChek(options);
+      } catch (error) {
+        if (error.code === "ERR_NETWORK") navigate("/error");
+      }
     };
 
     fetchData();
@@ -128,6 +147,16 @@ function Project() {
 
     fetchData();
   }, []);
+
+  const handlerCancel = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to go back project list?"
+    );
+    if (!confirmed) {
+      return; 
+    }
+    navigate("/project-list")
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,19 +177,19 @@ function Project() {
         formik.setFieldValue("groupId", object.data.groupId, true);
         formik.setFieldValue("status", object.data.status, true);
         formik.setFieldValue("startDate", dayjs(object.data.startDate, true));
-        console.log(object.data.endDate !== "0001-01-01T00:00:00");
         if (object.data.endDate !== "0001-01-01T00:00:00") {
           formik.setFieldValue("endDate", dayjs(object.data.endDate, true));
         } else {
           formik.setFieldValue("endDate", null, true);
         }
         formik.setFieldValue("members", members, true);
+      } else {
+        navigate("/project");
       }
     };
     fetchData();
   }, [projectId]);
 
-  console.log(formik.values.version);
   const handleBlur = (field) => () => {
     formik.setFieldTouched(field, true);
   };
@@ -193,9 +222,10 @@ function Project() {
         </p>
         <p className="errorMsg" style={{ fontSize: "15px", fontWeight: 700 }}>
           {(formik.errors.projectNumber === "Required" ||
-          formik.errors.name === "Required" ||
-          formik.errors.customer === "Required" ||
-          formik.errors.startDate) && formik.touched.projectNumber 
+            formik.errors.name === "Required" ||
+            formik.errors.customer === "Required" ||
+            formik.errors.startDate) &&
+          formik.touched.projectNumber
             ? "Please enter all the mandatory fields (*)"
             : ""}
         </p>
@@ -224,7 +254,11 @@ function Project() {
                 <p className="errorMsg">{formik.errors.projectNumber}</p>
               )}
               {check === false && projectId === undefined && (
-                <p className="errorMsg">{"Project number is exist!!"}</p>
+                <p className="errorMsg">
+                  {
+                    "The project number already existed. Please select a different project number"
+                  }
+                </p>
               )}
             </Grid>
             <Grid xs={4}></Grid>
@@ -387,7 +421,7 @@ function Project() {
               <Button
                 fullWidth
                 variant="outlined"
-                onClick={() => navigate("/project-list")}
+                onClick={handlerCancel}
               >
                 {translations[language].cancel}
               </Button>

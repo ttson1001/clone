@@ -3,9 +3,7 @@ import axios from "axios";
 
 export const fetchOptions = async () => {
   try {
-    const response = await axios.get(
-      "https://localhost:7099/groups"
-    );
+    const response = await axios.get("https://localhost:7099/groups");
     return response.data.data; // Assuming the options are present in the response data
   } catch (error) {
     console.error("Error fetching options:", error);
@@ -14,22 +12,19 @@ export const fetchOptions = async () => {
 };
 
 export const fetchProject = async (id) => {
-    if(id === undefined) return null;
+  if (id === undefined) return null;
   try {
     const response = await axios.get(`https://localhost:7099/projects/${id}`);
     return response.data;
-    
-  }catch (error){
-    console.error("Error fetching project: ", error)
+  } catch (error) {
+    console.error("Error fetching project: ", error);
     return null;
   }
 };
 
 export const fetchProjectList = async () => {
   try {
-    const response = await axios.get(
-      "https://localhost:7099/projects"
-    );
+    const response = await axios.get("https://localhost:7099/projects");
     return response.data.data; // Assuming the options are present in the response data
   } catch (error) {
     console.error("Error fetching options:", error);
@@ -38,79 +33,39 @@ export const fetchProjectList = async () => {
 };
 
 export const fetchProjectList2 = async (data) => {
-  // const navigate = useNavigate();
-  try {
-    const response = await axios.post(
-      "https://localhost:7099/projects/search",
-      data
-    );
-    return response.data.data;
-
-  } catch (error) {
-    if(error.code === "ERR_NETWORK")
-    console.error("Error creating record:", error);
-    // Handle the error
-  }
+  const response = await axios.post(
+    "https://localhost:7099/projects/search",
+    data
+  );
+  return response.data.data;
 };
 
 export const fetchProjectNumberList = async (projectNumer) => {
-  if(projectNumer === undefined) return null;
-  try {
-    const response = await axios.get(
-      `https://localhost:7099/projects/check-project-number/${projectNumer}`
-    );
-    return response.data.data;
-    
-  } catch (error) {
-    console.error("Errpr fetching project number: ", error)
-    return null;
-  }
-}
+  if (projectNumer === undefined) return null;
+  const response = await axios.get(
+    `https://localhost:7099/projects/check-project-number/${projectNumer}`
+  );
+  return response.data.data;
+};
 
 export const addProject = async (project) => {
-  if(project === undefined) return null;
+  if (project === undefined) return null;
   try {
     const response = await axios.post(
       `https://localhost:7099/projects/${project}`
     );
     return response.data.data;
   } catch (error) {
-    console.error("Errpr fetching project number: ", error)
+    console.error("Errpr fetching project number: ", error);
     return null;
   }
-}
+};
 
 export const deleteProject = async (data) => {
-  if(!data) return null;
-  console.log("sdfa",JSON.stringify(data));
-
-  try {
-    const response = await axios.delete(
-      `https://localhost:7099/projects`,{data: data,}
-    );
+  if (!data) return null;
+    const response = await axios.delete(`https://localhost:7099/projects`, {
+      data: data,
+    });
     return response.data.data;
-  } catch (error) {
-    console.error("Errpr fetching project number: ", error)
-    return null;
-  }
-}
-
-  // export const deleteProject = async (data) => {
-  //   if (!data) return null;
-  //   console.log("sdfa", JSON.stringify(data));
-  
-  //   try {
-  //     const response = await axios.delete("https://localhost:7099/projects", {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       data: JSON.stringify(data),
-  //     });
-  //     return response.data.data;
-  //   } catch (error) {
-  //     console.error("Error fetching project number: ", error);
-  //     return null;
-  //   }
-  
-
+};
 
