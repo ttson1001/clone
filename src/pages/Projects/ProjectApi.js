@@ -63,9 +63,22 @@ export const addProject = async (project) => {
 
 export const deleteProject = async (data) => {
   if (!data) return null;
-    const response = await axios.delete(`https://localhost:7099/projects`, {
-      data: data,
-    });
-    return response.data.data;
+  const response = await axios.delete(`https://localhost:7099/projects`, {
+    data: data,
+  });
+  return response.data.data;
 };
 
+export const paging = async (pageNumber, pageSize) => {
+  const data = {
+    pageSize: pageSize,
+    pageNumber: pageNumber,
+  };
+
+  if (!data) return null;
+  const response = await axios.post(
+    `https://localhost:7099/employees/Paging`,
+    data
+  );
+  return response.data;
+};
