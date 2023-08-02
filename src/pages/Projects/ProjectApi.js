@@ -40,6 +40,14 @@ export const fetchProjectList2 = async (data) => {
   return response.data.data;
 };
 
+export const fetchProjectList3 = async (data) => {
+  const response = await axios.post(
+    "https://localhost:7099/projects/paging/search",
+    data
+  );
+  return response.data;
+};
+
 export const fetchProjectNumberList = async (projectNumer) => {
   if (projectNumer === undefined) return null;
   const response = await axios.get(
@@ -77,7 +85,7 @@ export const paging = async (pageNumber, pageSize) => {
 
   if (!data) return null;
   const response = await axios.post(
-    `https://localhost:7099/employees/Paging`,
+    `https://localhost:7099/projects/paging`,
     data
   );
   return response.data;

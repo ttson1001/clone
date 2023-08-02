@@ -1,0 +1,9 @@
+.col {
+    text-align: center;
+    border-right : 1px solid lightgray;
+    border-left: 1px solid lightgray;
+}
+
+.table-container {
+    border: 1px solid #ccc;
+  }

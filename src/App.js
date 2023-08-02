@@ -6,7 +6,7 @@ import ProjectList from "./pages/ProjectList/ProjectList";
 import Error from "./pages/Error/Error";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Pagging from "./pages/ProjectList/Paging";
+import Pagging from "./pages/Paging/Paging";
 
 function App() {
   return (

@@ -13,11 +13,9 @@ export default function DataGridDemo({ data, onDeleteRow }) {
 
   const isRowSelectable = (params) => {
     return params.row.status === "NEW";
-   
   };
 
   const handleDeleteSelected = () => {
-    console.log("Deleting selected rows:", rowSelectionModel);
     onDeleteRow(rowSelectionModel);
     setSelectedRows([]);
   };
@@ -107,18 +105,17 @@ export default function DataGridDemo({ data, onDeleteRow }) {
         checkboxSelection
         disableRowSelectionOnClick
       />
-      <br/>
-      {/* Nút "Delete Selected" để xóa các dòng đã chọn */}
+      <br />
       <Button
         variant="outlined"
         size="small"
         color="error"
-        // style={{ margin: "10px 0", border: "none" }}
         onClick={handleDeleteSelected}
         disabled={rowSelectionModel.length === 0}
       >
-       {translations[language].delete}
+        {translations[language].delete}
       </Button>
+
     </Box>
   );
 }
